@@ -11,15 +11,17 @@ class EncoderCNN(nn.Module):
         resnet = models.resnet152(pretrained=True)
         modules = list(resnet.children())[:-1]      # delete the last fc layer.
         self.resnet = nn.Sequential(*modules)
-        self.linear = nn.Linear(resnet.fc.in_features, embed_size)
-        self.bn = nn.BatchNorm1d(embed_size, momentum=0.01)
+        self.mlp = nn.Sequential(nn.Linear(resnet.fc.in_features, resnet.fc.in_features/2),
+                                nn.BatchNorm1d(resnet.fc.in_features/2, momentum=0.01),
+                                nn.Linear(resnet.fc.in_features/2, embed_size),
+                                nn.BatchNorm1d(embed_size, momentum=0.01))
         
     def forward(self, images):
         """Extract feature vectors from input images."""
         with torch.no_grad():
             features = self.resnet(images)
         features = features.reshape(features.size(0), -1)
-        features = self.bn(self.linear(features))
+        features = self.mlp(features)
         return features
 
 
@@ -29,7 +31,8 @@ class DecoderRNN(nn.Module):
         super(DecoderRNN, self).__init__()
         self.embed = nn.Embedding(vocab_size, embed_size)
         self.lstm = nn.LSTM(embed_size, hidden_size, num_layers, batch_first=True)
-        self.linear = nn.Linear(hidden_size, vocab_size)
+        self.linear1 = nn.Linear(hidden_size, hidden_size/2)
+        self.lienar2 = nn.Linear(hidden_size/2, vocab_size)
         self.max_seg_length = max_seq_length
         
     def forward(self, features, captions, lengths):
@@ -38,7 +41,8 @@ class DecoderRNN(nn.Module):
         embeddings = torch.cat((features.unsqueeze(1), embeddings), 1)
         packed = pack_padded_sequence(embeddings, lengths, batch_first=True) 
         hiddens, _ = self.lstm(packed)
-        outputs = self.linear(hiddens[0])
+        outputs = self.linear1(hiddens[0])
+        outputs = self.linear2(outputs)
         return outputs
     
     def sample(self, features, states=None):
@@ -47,7 +51,8 @@ class DecoderRNN(nn.Module):
         inputs = features.unsqueeze(1)
         for i in range(self.max_seg_length):
             hiddens, states = self.lstm(inputs, states)          # hiddens: (batch_size, 1, hidden_size)
-            outputs = self.linear(hiddens.squeeze(1))            # outputs:  (batch_size, vocab_size)
+            outputs = self.linear1(hiddens.squeeze(1))            # outputs:  (batch_size, vocab_size)
+            outputs = self.linear2(outputs)
             _, predicted = outputs.max(1)                        # predicted: (batch_size)
             sampled_ids.append(predicted)
             inputs = self.embed(predicted)                       # inputs: (batch_size, embed_size)
