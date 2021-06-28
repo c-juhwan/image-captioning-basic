@@ -17,4 +17,4 @@ python resize.py
 
 python train.py
 
-python python sample.py --image='png/example.png'
+python sample.py --image='png/example.png'
