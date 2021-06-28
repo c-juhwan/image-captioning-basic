@@ -9,6 +9,7 @@ from build_vocab import Vocabulary
 from model import EncoderCNN, DecoderRNN
 from torch.nn.utils.rnn import pack_padded_sequence
 from torchvision import transforms
+from tqdm.auto import tqdm
 
 
 # Device configuration
@@ -52,8 +53,8 @@ def main(args):
     
     # Train the models
     total_step = len(data_loader)
-    for epoch in range(args.num_epochs):
-        for i, (images, captions, lengths) in enumerate(data_loader):
+    for epoch in tqdm(range(args.num_epochs)):
+        for i, (images, captions, lengths) in enumerate(tqdm(data_loader)):
             
             # Set mini-batch dataset
             images = images.to(device)
@@ -81,6 +82,9 @@ def main(args):
                 torch.save(encoder.state_dict(), os.path.join(
                     args.model_path, 'encoder-{}-{}.ckpt'.format(epoch+1, i+1)))
 
+        print('Epoch [{}/{}] Finished, Loss: {:.4f}, Perplexity: {:5.4f}'
+                      .format(epoch, args.num_epochs, i, total_step, loss.item(), np.exp(loss.item())))
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -89,7 +93,7 @@ if __name__ == '__main__':
     parser.add_argument('--vocab_path', type=str, default='data/vocab.pkl', help='path for vocabulary wrapper')
     parser.add_argument('--image_dir', type=str, default='data/resized2014', help='directory for resized images')
     parser.add_argument('--caption_path', type=str, default='data/annotations/captions_train2014.json', help='path for train annotation json file')
-    parser.add_argument('--log_step', type=int , default=10, help='step size for prining log info')
+    parser.add_argument('--log_step', type=int , default=1000, help='step size for prining log info')
     parser.add_argument('--save_step', type=int , default=1000, help='step size for saving trained models')
     
     # Model parameters

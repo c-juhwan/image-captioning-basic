@@ -3,6 +3,7 @@ import pickle
 import argparse
 from collections import Counter
 from pycocotools.coco import COCO
+from tqdm.auto import tqdm
 
 
 class Vocabulary(object):
@@ -13,7 +14,6 @@ class Vocabulary(object):
         self.idx = 0
 
     def add_word(self, word):
-    #word2idx, idx2word에 word 추가(중복X)
         if not word in self.word2idx:
             self.word2idx[word] = self.idx
             self.idx2word[self.idx] = word
@@ -33,13 +33,12 @@ def build_vocab(json, threshold):
     coco = COCO(json)
     counter = Counter()
     ids = coco.anns.keys()
-    for i, id in enumerate(ids):
+    for i, id in enumerate(tqdm(ids)):
         caption = str(coco.anns[id]['caption'])
         tokens = nltk.tokenize.word_tokenize(caption.lower())
         counter.update(tokens)
-        #문장별로 들어가서 tokenize하고 count 추가?
-        if (i+1) % 1000 == 0:
-            print("[{}/{}] Tokenized the captions.".format(i+1, len(ids)))
+        #if (i+1) % 1000 == 0:
+        #    print("[{}/{}] Tokenized the captions.".format(i+1, len(ids)))
 
     # If the word frequency is less than 'threshold', then the word is discarded.
     words = [word for word, cnt in counter.items() if cnt >= threshold]
