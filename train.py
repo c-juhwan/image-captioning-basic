@@ -20,17 +20,33 @@ def main(args):
     if not os.path.exists(args.model_path):
         os.makedirs(args.model_path)
     
+    """
+    https://pytorch.org/vision/stable/models.html
+
+    All pre-trained models expect input images normalized in the same way, 
+    i.e. mini-batches of 3-channel RGB images of shape (3 x H x W), 
+    where H and W are expected to be at least 224. 
+    
+    The images have to be loaded in to a range of [0, 1] 
+    and then normalized using mean = [0.485, 0.456, 0.406] and std = [0.229, 0.224, 0.225]. 
+    You can use the following transform to normalize:
+
+    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                     std=[0.229, 0.224, 0.225])
+    """
+    
     # Image preprocessing, normalization for the pretrained resnet
     transform = transforms.Compose([ 
-        transforms.RandomCrop(args.crop_size),
+        transforms.RandomCrop(args.crop_size), # crop 224x224 from 256x256 image
         transforms.RandomHorizontalFlip(), 
         transforms.RandomVerticalFlip(),
         transforms.ToTensor(), 
-        transforms.Normalize((0.485, 0.456, 0.406), 
+        transforms.Normalize((0.485, 0.456, 0.406),        # normalize with predefined mean & std above
                              (0.229, 0.224, 0.225))])
     
     # Load vocabulary wrapper
     with open(args.vocab_path, 'rb') as f:
+        # use saved vocab file from main() of build_vocab.py
         vocab = pickle.load(f)
     
     # Build data loader
@@ -44,6 +60,7 @@ def main(args):
     
     # Loss and optimizer
     criterion = nn.CrossEntropyLoss()
+    # Encoder의 CNN 부분은 Pretrained 되어있기 때문에, linear와 batch norm만 학습하면 됨
     params = list(decoder.parameters()) + list(encoder.linears.parameters())
     optimizer = torch.optim.Adam(params, lr=args.learning_rate)
 
