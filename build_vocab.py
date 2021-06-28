@@ -56,6 +56,7 @@ def build_vocab(json, threshold):
     return vocab
 
 def main(args):
+    nltk.download('punkt')
     vocab = build_vocab(json=args.caption_path, threshold=args.threshold)
     vocab_path = args.vocab_path
     with open(vocab_path, 'wb') as f:
