@@ -44,8 +44,8 @@ class CocoDataset(data.Dataset):
         tokens = nltk.tokenize.word_tokenize(str(caption).lower())
         caption = []
         caption.append(vocab('<start>')) # <start>에 해당하는 token index를 추가
-        caption.append([vocab(token) for token in tokens]) # 각 token의 index 추가
-        # 단어를 append 할 때, vocab(token)에서 Vocabulary()의 __call__() 이 호출되는데, 
+        caption.extend([vocab(token) for token in tokens]) # 각 token의 index 추가
+        # 단어를 extend 할 때, vocab(token)에서 Vocabulary()의 __call__() 이 호출되는데, 
         # 이 때 Vocabulary에 등록되지 않은 단어에 대해서는 <unk> 반환
         caption.append(vocab('<end>')) # 문장 끝에 <end> 추가
 
