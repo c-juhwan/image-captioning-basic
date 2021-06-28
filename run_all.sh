@@ -11,6 +11,7 @@ pip install -r requirements.txt
 chmod +x download.sh
 ./download.sh
 
+python download_nltk.py
 python build_vocab.py   
 python resize.py
 
