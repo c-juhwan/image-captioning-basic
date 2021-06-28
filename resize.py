@@ -16,7 +16,7 @@ def resize_images(image_dir, output_dir, size):
     images = os.listdir(image_dir) # image_dir 내의 모든 파일 및 폴더를 리스트화함
     num_images = len(images)
 
-    for i, image in enumerate(images): 
+    for i, image in enumerate(tqdm(images, total=len(images))):
         with open(os.path.join(image_dir, image), 'r+b') as f: # open each image file
             with Image.open(f) as img: # open loaded file to Image module
                 img = resize_image(img, size) # resize each image to given size

@@ -36,7 +36,8 @@ def build_vocab(json, threshold):
     coco = COCO(json)
     counter = Counter()
     ids = coco.anns.keys()
-    for i, id in enumerate(ids):
+    
+    for i, id in enumerate(tqdm(ids, total=len(ids))):
         caption = str(coco.anns[id]['caption']) # json file의 caption 부분을 불러옴
         tokens = nltk.tokenize.word_tokenize(caption.lower()) # 불러온 caption의 lower case를 토큰화
         counter.update(tokens)
