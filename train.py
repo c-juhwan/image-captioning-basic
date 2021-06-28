@@ -54,7 +54,7 @@ def main(args):
     # Train the models
     total_step = len(data_loader)
     for epoch in tqdm(range(args.num_epochs)):
-        for i, (images, captions, lengths) in enumerate(tqdm(data_loader)):
+        for i, (images, captions, lengths) in enumerate(tqdm(data_loader, total=len(data_loader))):
             
             # Set mini-batch dataset
             images = images.to(device)

@@ -33,7 +33,7 @@ def build_vocab(json, threshold):
     coco = COCO(json)
     counter = Counter()
     ids = coco.anns.keys()
-    for i, id in enumerate(tqdm(ids)):
+    for i, id in enumerate(tqdm(ids, total=len(ids))):
         caption = str(coco.anns[id]['caption'])
         tokens = nltk.tokenize.word_tokenize(caption.lower())
         counter.update(tokens)
