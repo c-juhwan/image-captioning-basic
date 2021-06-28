@@ -44,7 +44,7 @@ def build_vocab(json, threshold):
     # If the word frequency is less than 'threshold', then the word is discarded.
     words = [word for word, cnt in counter.items() if cnt >= threshold]
 
-    # Create a vocab wrapper and add some special tokens.
+    # Create a vocab wrapper and add some special tokens.s
     vocab = Vocabulary()
     vocab.add_word('<pad>')
     vocab.add_word('<start>')
