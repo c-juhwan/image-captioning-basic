@@ -56,7 +56,7 @@ def main(args):
     sampled_caption = []
     for word_id in sampled_ids:
         word = vocab.idx2word[word_id]
-        if word == '.' or ',' or '?' or '!':
+        if word in ['.', ',', '!', '?']:
             sampled_caption[-1] = sampled_caption[-1] + word
             continue
         sampled_caption.append(word)
