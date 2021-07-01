@@ -1,6 +1,7 @@
 import argparse
 import os
 from PIL import Image
+from tqdm.auto import tqdm
 
 
 def resize_image(image, size):
@@ -12,22 +13,24 @@ def resize_images(image_dir, output_dir, size):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    images = os.listdir(image_dir)
+    images = os.listdir(image_dir) # image_dir 내의 모든 파일 및 폴더를 리스트화함
     num_images = len(images)
-    for i, image in enumerate(images):
-        with open(os.path.join(image_dir, image), 'r+b') as f:
-            with Image.open(f) as img:
-                img = resize_image(img, size)
+
+    for i, image in enumerate(tqdm(images, total=len(images))):
+        with open(os.path.join(image_dir, image), 'r+b') as f: # open each image file
+            with Image.open(f) as img: # open loaded file to Image module
+                img = resize_image(img, size) # resize each image to given size
                 img.save(os.path.join(output_dir, image), img.format)
-        if (i+1) % 100 == 0:
-            print ("[{}/{}] Resized the images and saved into '{}'."
-                   .format(i+1, num_images, output_dir))
+        #if (i+1) % 100 == 0:
+        #    print ("[{}/{}] Resized the images and saved into '{}'."
+        #           .format(i+1, num_images, output_dir))
 
 def main(args):
     image_dir = args.image_dir
     output_dir = args.output_dir
-    image_size = [args.image_size, args.image_size]
+    image_size = [args.image_size, args.image_size] # resized image will be square size
     resize_images(image_dir, output_dir, image_size)
+    print("Saved resized images to '{}'".format(output_dir))
 
 
 if __name__ == '__main__':
